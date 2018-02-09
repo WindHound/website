@@ -1,0 +1,39 @@
+<html>
+  <head>
+    <style>
+      body {
+	background-color: #17a6f3;
+      }
+      #form {
+	margin:auto;
+	top: 23vw;
+	width: 14%;
+      }
+      #logo {
+	margin:auto;
+	top: 20px;
+	width: 14%;
+	height: 20vw;
+	background-image:url("logo2.svg");
+	background-size:contain;
+	background-repeat:no-repeat;
+      }
+      input {
+	width:100%;
+      }
+    </style>
+  </head>
+  <body><div id="logo"></div>
+    <div id="form">
+	<form method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>">
+ 	Username:<br>
+  	<input type="text" name="username" required>
+  	<br>
+  	Password:<br>
+  	<input type="password" name="password" required>
+  	<br><br>
+  	<input type="submit" value="Submit">
+	</form>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,179 @@
+<html>
+<head>
+  <style>
+  #map {
+    position: absolute;
+    left: 10%;
+    top: 50px;
+    height: 400px;
+    width: 50%;
+    border-style: solid;
+    border-width: 15px;
+    border-color: #17a6f3;
+  }
+  #leaderboard {
+    position: absolute;
+    left: 60%;
+    top: 50px;
+    height: 400px;
+    width: 30%;
+    border-style: solid;
+    border-width: 15px;
+    border-color: #17a6f3;
+  }
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+  <div id="leaderboard"><center><h2>Leaderboard</h2><br><table><tr><th>Position</th><th>Name</th><th>Colour</th></tr></table></center></div>
+  <input onclick="resetMap();" type=button value="Press to reset race.">
+  <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBy-_F3WSHUYwyvV676CABgyj2Kq8a9EjY&callback=initMap">
+  </script>
+  <script>
+  var step = 0;
+  var racePaths = [];
+  function boat(distance, name, colour, locations) {
+    this.distanceTravelled = distance;
+    this.boatName = name;
+    this.displayColour = colour;
+    this.coordinatesVisited = locations;
+  }
+  function raceTimer(raceProgressionFunction, t) {
+    var timer = setInterval(raceProgressionFunction, t);
+
+    this.stop = function() {
+      if (timer) {
+        clearInterval(timer);
+        timer = null;
+      }
+      return this;
+    }
+
+    this.start = function() {
+      if (!timer) {
+        this.stop();
+        timer = setInterval(raceProgressionFunction, t);
+      }
+      return this;
+    }
+
+    this.reset = function() {
+      return this.stop().start();
+    }
+  }
+
+  function initMap() {
+    map = new google.maps.Map(document.getElementById('map'), {
+      //These two values will probably vary by race.
+      zoom: 16,
+      center: {lat: 51.455792, lng: -2.603306},
+      mapTypeId: 'terrain'
+    });
+    var text = "<center><h2>Leaderboard</h2><br><table><tr><th>Position</th><th>Name</th><th>Colour</th></tr>";
+
+    //The boats are defined manually for the time being; this is where we need
+    //to import data from the database.
+    var purplePath = [
+      {lat: 51.455792, lng: -2.603306},
+      {lat: 51.455622, lng: -2.603381},
+      {lat: 51.455896, lng: -2.604561}
+    ];
+    var redPath = [
+      {lat: 51.456133, lng: -2.602818},
+      {lat: 51.456160, lng: -2.601976}
+    ];
+    var greenPath = [
+      {lat: 51.455511, lng: -2.602914},
+      {lat: 51.455183, lng: -2.603563},
+      {lat: 51.455661, lng: -2.604287}
+    ];
+    var yellowPath = [
+      {lat: 51.456012, lng: -2.605435},
+      {lat: 51.456279, lng: -2.606089},
+      {lat: 51.456032, lng: -2.606143},
+      {lat: 51.456045, lng: -2.607838}
+    ];
+    var paths = [purplePath, redPath, yellowPath, greenPath];
+    var Purple = new boat(100, "Purple", "7b0083", purplePath);
+    var Red = new boat(60, "Red", "dd2828", redPath);
+    var Green = new boat (80, "Green","239609", greenPath);
+    var Yellow = new boat (70, "Yellow","ffb400", yellowPath);
+    var boats = [Purple, Red, Green, Yellow];
+    var p = 0;
+    var maxLength = 0;
+    var pathLength = 0;
+    for (p=0; p<paths.length; p++) {
+      if (maxLength < paths[p].length) {
+        maxLength = paths[p].length;
+      }
+    }
+    for (p=0; p<paths.length; p++) {
+      var d = 0;
+      var path = paths[p];
+      var length = path.length;
+      var target = length-1;
+      var dif = maxLength-path.length;
+      var endLat = path[target].lat;
+      var endLong = path[target].lng;
+      var padding = {lat: endLat, lng: endLong};
+      for (d=0; d<dif; d++) {
+        path.splice(target,0,padding);
+      }
+    }
+    var timePerStep = 2000; //Change this to alter animation speed
+    var raceProgressionPaths = []
+    var j = 0;
+    for (j=0;j<boats.length;j++) {
+      var colour =  "#" + boats[j].displayColour;
+      var startingLat = boats[j].coordinatesVisited[0].lat;
+      var startingLong = boats[j].coordinatesVisited[0].lng;
+      var basePath = [{lat: startingLat, lng:startingLong}];
+      window.racePaths[j] = new google.maps.Polyline({
+        path: basePath,
+        geodesic: true,
+        strokeColor: colour,
+        strokeOpacity: 1.0,
+        strokeWeight: 2,
+      });
+    }
+    timer = new raceTimer(function() {
+      if (window.step < maxLength) {
+        text = "<center><h2>Leaderboard</h2><br><table><tr><th>Position</th><th>Name</th><th>Colour</th></tr>";
+        var i = 0;
+        //Manually changing this for now, but once we have a database this is where
+        //we'll want to get the new value for distance travelled from the database.
+        Yellow.distanceTravelled = 70+11*step;
+
+        boats.sort(function(a,b){return b.distanceTravelled-a.distanceTravelled});
+        for (i=0; i<boats.length; i++) {
+          var colour =  "#" + boats[i].displayColour;
+          text += "<tr><td>" + (i+1) + "</td><td>" + boats[i].boatName + "</td><td style=\"background:" + colour + ";\"></td></tr>";
+          window.racePaths[i].setOptions({strokeColor: colour});
+          window.racePaths[i].setPath(boats[i].coordinatesVisited.slice(0, step+1));
+        }
+        text += "</table></center>";
+        document.getElementById("leaderboard").innerHTML = text;
+        for (i=0;i<boats.length;i++) {
+          window.racePaths[i].setMap(map);
+        }
+      }
+      else {
+        timer.stop();
+        text +="<center><h2>Race Complete!</h2></center>";
+        document.getElementById("leaderboard").innerHTML = text;
+      }
+      window.step += 1;
+    }, timePerStep);
+  }
+  function resetMap () {
+    var i = 0;
+    for (i=0; i<window.racePaths.length; i++) {
+      window.racePaths[i].setMap(null);
+    }
+    window.step = 0;
+    timer = timer.reset();
+    document.getElementById("leaderboard").innerHTML = "<center><h2>Leaderboard</h2><br><table><tr><th>Position</th><th>Name</th><th>Colour</th></tr></table></center>";
+  }
+  </script>
+</body>
+</html>
