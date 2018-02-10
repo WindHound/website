@@ -68,8 +68,17 @@
   }
   #timelineSlider {
     height:3vh;
-    margin: auto;
+    margin-left: 7.5vw;
     width:90vw;
+  }
+  #timelineLogo {
+    position: absolute;
+    top: 0.5vh;
+    height: 8vh;
+    width: 8vw;
+    background-image: url("logo.svg");
+    background-repeat: no-repeat;
+    background-position: center center;
   }
   #timelineTitle {
     height:4vh;
@@ -140,7 +149,7 @@
   <div id="leaderboard"><center><h2>Leaderboard</h2><br><table class="table"><tr><th>Position</th><th>Name</th><th>Colour</th></tr></table></center></div>
   <p id="test"></p>
   <div id="controls"><button onclick="window.location.assign('hometest.htm')" type="button" class="button-1"></button><button onclick="resetMap();" type="button" class="button-2"><button type="button" class="button-3"></button></button></div>
-  <div id="timeline"><div id="timelineTitle">Timeline</div><div id="timelineSlider">
+  <div id="timeline"><div id="timelineLogo"></div><div id="timelineTitle">Timeline</div><div id="timelineSlider">
     <input type="range" min="0" max="100" value="0" class="slider" id="timelineValue">
   </div></div>
   <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBy-_F3WSHUYwyvV676CABgyj2Kq8a9EjY&callback=initMap">
