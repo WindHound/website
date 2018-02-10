@@ -26,14 +26,15 @@
 <body>
   <div id="map"></div>
   <div id="leaderboard"><center><h2>Leaderboard</h2><br><table><tr><th>Position</th><th>Name</th><th>Colour</th></tr></table></center></div>
+  <p id="test"></p>
   <input onclick="resetMap();" type=button value="Press to reset race.">
   <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBy-_F3WSHUYwyvV676CABgyj2Kq8a9EjY&callback=initMap">
   </script>
   <script>
   var step = 0;
   var racePaths = [];
-  function boat(distance, name, colour, locations) {
-    this.distanceTravelled = distance;
+  function boat(scores, name, colour, locations) {
+    this.scores = scores;
     this.boatName = name;
     this.displayColour = colour;
     this.coordinatesVisited = locations;
@@ -78,26 +79,31 @@
       {lat: 51.455622, lng: -2.603381},
       {lat: 51.455896, lng: -2.604561}
     ];
+    var purpleScores =[100, 100, 100, 100];
     var redPath = [
       {lat: 51.456133, lng: -2.602818},
       {lat: 51.456160, lng: -2.601976}
     ];
+    var redScores = [60,60];
     var greenPath = [
       {lat: 51.455511, lng: -2.602914},
       {lat: 51.455183, lng: -2.603563},
       {lat: 51.455661, lng: -2.604287}
     ];
+    var greenScores = [80, 80, 80];
     var yellowPath = [
       {lat: 51.456012, lng: -2.605435},
       {lat: 51.456279, lng: -2.606089},
       {lat: 51.456032, lng: -2.606143},
       {lat: 51.456045, lng: -2.607838}
     ];
+    var yellowScores = [70, 85, 100, 110];
+    var scores = [purpleScores, redScores, yellowScores, greenScores];
     var paths = [purplePath, redPath, yellowPath, greenPath];
-    var Purple = new boat(100, "Purple", "7b0083", purplePath);
-    var Red = new boat(60, "Red", "dd2828", redPath);
-    var Green = new boat (80, "Green","239609", greenPath);
-    var Yellow = new boat (70, "Yellow","ffb400", yellowPath);
+    var Purple = new boat(purpleScores, "Purple", "7b0083", purplePath);
+    var Red = new boat(redScores, "Red", "dd2828", redPath);
+    var Green = new boat (greenScores, "Green","239609", greenPath);
+    var Yellow = new boat (yellowScores, "Yellow","ffb400", yellowPath);
     var boats = [Purple, Red, Green, Yellow];
     var p = 0;
     var maxLength = 0;
@@ -105,6 +111,11 @@
     for (p=0; p<paths.length; p++) {
       if (maxLength < paths[p].length) {
         maxLength = paths[p].length;
+      }
+    }
+    for (p=0; p<scores.length; p++) {
+      if (maxLength < scores[p].length) {
+        maxLength = scores[p].length;
       }
     }
     for (p=0; p<paths.length; p++) {
@@ -118,6 +129,17 @@
       var padding = {lat: endLat, lng: endLong};
       for (d=0; d<dif; d++) {
         path.splice(target,0,padding);
+      }
+    }
+    for (p=0; p<scores.length; p++) {
+      var d = 0;
+      var score = scores[p];
+      var length = score.length;
+      var target = length-1;
+      var dif = maxLength-score.length;
+      var endScore = score[target];
+      for (d=0; d<dif; d++) {
+        score.splice(target,0,endScore);
       }
     }
     var timePerStep = 2000; //Change this to alter animation speed
@@ -142,9 +164,7 @@
         var i = 0;
         //Manually changing this for now, but once we have a database this is where
         //we'll want to get the new value for distance travelled from the database.
-        Yellow.distanceTravelled = 70+11*step;
-
-        boats.sort(function(a,b){return b.distanceTravelled-a.distanceTravelled});
+        boats.sort(function(a,b){return b.scores[step]-a.scores[step]});
         for (i=0; i<boats.length; i++) {
           var colour =  "#" + boats[i].displayColour;
           text += "<tr><td>" + (i+1) + "</td><td>" + boats[i].boatName + "</td><td style=\"background:" + colour + ";\"></td></tr>";
