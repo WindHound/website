@@ -5,7 +5,7 @@
     position: absolute;
     left: 0px;
     top: 0px;
-    height: 100vh;
+    height: 90vh;
     width: 84vw;
     /* border-style: solid;
     border-width: 1vw;
@@ -14,13 +14,13 @@
   #leaderboard {
     position: absolute;
     left: 84vw;
-    top: 20vh;
-    height: 80vh;
+    top: 50px;
+    height: calc(90vh - 50px);
     width: 14vw;
     /* border-style: solid;
     border-width: 1vw;
     border-color: #17a6f3; */
-    background-color: #a2dbfa;
+    background-color: #ffffff;
     overflow: auto;
     padding-left: 1vw;
     padding-right: 1vw;
@@ -32,44 +32,123 @@
     color: #063148;
     font-size: 0.85em;
   }
-  #reset {
+  #controls {
     position: absolute;
     left: 84vw;
     top: 0px;
-    height: 20vh;
+    height: 50px;
     width: 16vw;
     /* border-style: solid;
     border-width: 1vw;
     border-color: #17a6f3; */
     background-color: #a2dbfa;
   }
-  .button {
+  #timeline {
+    position: absolute;
+    left: 0px;
+    top: 90vh;
+    height: 10vh;
+    width: 100vw;
+    background-color: #a2dbfa;
+  }
+  [class*="button-"] {
     border: 3px solid #063148;
     color: #063148;
     background-color: #17a6f3;
     height:100%;
-    width:100%;
+    width:calc(100%/3);
     -webkit-transition-duration: 0.4s; /* Safari */
     transition-duration: 0.4s;
     cursor: pointer;
     font-weight: bold;
     font-size: 1.5em;
+    padding: 10px;
+    text-align: center;
+
   }
-  .button:hover {
+  #timelineSlider {
+    height:3vh;
+    margin: auto;
+    width:90vw;
+  }
+  #timelineTitle {
+    height:4vh;
+    width:100vw;
+    text-align: center;
+    font-size: 3vh;
+    font-family: "Verdana";
+  }
+  [class*="button-"]:hover {
     background-color: #a2dbfa;
   }
+  .button-1 {
+    background-image:url("backarrow.svg");
+    background-size:40px 40px;
+    background-position: center;
+    background-repeat:no-repeat;
+  }
+  .button-2 {
+    background-image:url("reset.svg");
+    background-size:40px 40px;
+    background-position: center;
+    background-repeat:no-repeat;
+  }
+  @media only screen and (max-width:1000px) {
+    [class*="button-"] {background-size: 30px 30px;}
+  }
+  @media only screen and (max-width:850px) {
+    [class*="button-"] {background-size: 25px 25px;}
+  }
+  @media only screen and (max-width:700px) {
+    #controls {display:none;}
+    [class*="button-"] {display:none;}
+    #leaderboard {display:none;}
+    #map{width:100%;}
+  }
+
+  .slider {
+    -webkit-appearance: none;
+    margin:auto;
+    width: 100%;
+    height: 2.5vh;
+    border: none;
+    /* border-radius: 1vh; */
+    background: transparent;
+    outline: none;
+  }
+  .slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 4vh;
+    height: 4vh;
+    border-radius: 2vh;
+    background: #063148;
+    cursor: pointer;
+  }
+
+  .slider::-moz-range-thumb {
+    width: 4vh;
+    height: 4vh;
+    border-radius: 2vh;
+    background: #063148;
+    cursor: pointer;
+    }
   </style>
 </head>
 <body>
   <div id="map"></div>
   <div id="leaderboard"><center><h2>Leaderboard</h2><br><table class="table"><tr><th>Position</th><th>Name</th><th>Colour</th></tr></table></center></div>
   <p id="test"></p>
-  <div id="reset"><button onclick="resetMap();" type="button" class="button">Press to reset race.</button></div>
+  <div id="controls"><button onclick="window.location.assign('hometest.htm')" type="button" class="button-1"></button><button onclick="resetMap();" type="button" class="button-2"><button type="button" class="button-3"></button></button></div>
+  <div id="timeline"><div id="timelineTitle">Timeline</div><div id="timelineSlider">
+    <input type="range" min="0" max="100" value="0" class="slider" id="timelineValue">
+  </div></div>
   <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBy-_F3WSHUYwyvV676CABgyj2Kq8a9EjY&callback=initMap">
   </script>
   <script>
   var step = 0;
   var racePaths = [];
+  var maxLength = 0;
   function boat(scores, name, colour, locations) {
     this.scores = scores;
     this.boatName = name;
@@ -143,7 +222,6 @@
     var Yellow = new boat (yellowScores, "Yellow","ffb400", yellowPath);
     var boats = [Purple, Red, Green, Yellow];
     var p = 0;
-    var maxLength = 0;
     var pathLength = 0;
     for (p=0; p<paths.length; p++) {
       if (maxLength < paths[p].length) {
@@ -155,6 +233,10 @@
         maxLength = scores[p].length;
       }
     }
+    // var t = 0;
+    // for (t=0; t<maxLength;t++) {
+    //   document.getElementById("timelineSlider").innerHTML += "<button onclick='step="+ t +";timer=timer.reset();' style='width:" + 100/maxLength + "%;height:100%;border:none;'></button>"
+    // }
     for (p=0; p<paths.length; p++) {
       var d = 0;
       var path = paths[p];
@@ -179,6 +261,25 @@
         score.splice(target,0,endScore);
       }
     }
+    var slider = document.getElementById("timelineValue");
+    slider.onmouseup = function() {
+      step = Math.floor(slider.value/100*maxLength);
+      timer.reset();
+      boats.sort(function(a,b){return b.scores[step]-a.scores[step]});
+      text = "<center><h2>Leaderboard</h2><br><table class='table'><tr><th>Position</th><th>Name</th><th>Colour</th></tr>";
+      for (i=0; i<boats.length; i++) {
+        var colour =  "#" + boats[i].displayColour;
+        text += "<tr><td>" + (i+1) + "</td><td>" + boats[i].boatName + "</td><td style=\"background:" + colour + ";\"></td></tr>";
+        window.racePaths[i].setOptions({strokeColor: colour});
+        window.racePaths[i].setPath(boats[i].coordinatesVisited.slice(0, step+1));
+      }
+      text += "</table></center>";
+      document.getElementById("leaderboard").innerHTML = text;
+      for (i=0;i<boats.length;i++) {
+        window.racePaths[i].setMap(map);
+      }
+      // document.getElementById("timelineTitle").innerHTML = "Timeline Drag" + slider.value + " = " + step;
+    }
     var timePerStep = 2000; //Change this to alter animation speed
     var raceProgressionPaths = []
     var j = 0;
@@ -199,8 +300,6 @@
       if (window.step < maxLength) {
         text = "<center><h2>Leaderboard</h2><br><table class='table'><tr><th>Position</th><th>Name</th><th>Colour</th></tr>";
         var i = 0;
-        //Manually changing this for now, but once we have a database this is where
-        //we'll want to get the new value for distance travelled from the database.
         boats.sort(function(a,b){return b.scores[step]-a.scores[step]});
         for (i=0; i<boats.length; i++) {
           var colour =  "#" + boats[i].displayColour;
@@ -213,13 +312,16 @@
         for (i=0;i<boats.length;i++) {
           window.racePaths[i].setMap(map);
         }
+        window.step += 1;
+        slider.value = step/(maxLength+1)*100;
       }
       else {
         timer.stop();
         text +="<center><h2>Race Complete!</h2></center>";
         document.getElementById("leaderboard").innerHTML = text;
+        slider.value=100;
       }
-      window.step += 1;
+
     }, timePerStep);
   }
   function resetMap () {
@@ -228,8 +330,9 @@
       window.racePaths[i].setMap(null);
     }
     window.step = 0;
+    // slider.value = 0;
     timer = timer.reset();
-    document.getElementById("leaderboard").innerHTML = "<center><h2>Leaderboard</h2><br><table><tr><th>Position</th><th>Name</th><th>Colour</th></tr></table></center>";
+    document.getElementById("leaderboard").innerHTML = "<center><h2>Leaderboard</h2><br><table class='table'><tr><th>Position</th><th>Name</th><th>Colour</th></tr></table></center>";
   }
   </script>
 </body>
