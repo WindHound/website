@@ -3,31 +3,68 @@
   <style>
   #map {
     position: absolute;
-    left: 10%;
-    top: 50px;
-    height: 400px;
-    width: 50%;
-    border-style: solid;
-    border-width: 15px;
-    border-color: #17a6f3;
+    left: 0px;
+    top: 0px;
+    height: 100vh;
+    width: 84vw;
+    /* border-style: solid;
+    border-width: 1vw;
+    border-color: #17a6f3; */
   }
   #leaderboard {
     position: absolute;
-    left: 60%;
-    top: 50px;
-    height: 400px;
-    width: 30%;
-    border-style: solid;
-    border-width: 15px;
-    border-color: #17a6f3;
+    left: 84vw;
+    top: 20vh;
+    height: 80vh;
+    width: 14vw;
+    /* border-style: solid;
+    border-width: 1vw;
+    border-color: #17a6f3; */
+    background-color: #a2dbfa;
+    overflow: auto;
+    padding-left: 1vw;
+    padding-right: 1vw;
+    color: #063148;
+    font-family: "Verdana";
+    font-size: 0.85em;
+  }
+  .table {
+    color: #063148;
+    font-size: 0.85em;
+  }
+  #reset {
+    position: absolute;
+    left: 84vw;
+    top: 0px;
+    height: 20vh;
+    width: 16vw;
+    /* border-style: solid;
+    border-width: 1vw;
+    border-color: #17a6f3; */
+    background-color: #a2dbfa;
+  }
+  .button {
+    border: 3px solid #063148;
+    color: #063148;
+    background-color: #17a6f3;
+    height:100%;
+    width:100%;
+    -webkit-transition-duration: 0.4s; /* Safari */
+    transition-duration: 0.4s;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 1.5em;
+  }
+  .button:hover {
+    background-color: #a2dbfa;
   }
   </style>
 </head>
 <body>
   <div id="map"></div>
-  <div id="leaderboard"><center><h2>Leaderboard</h2><br><table><tr><th>Position</th><th>Name</th><th>Colour</th></tr></table></center></div>
+  <div id="leaderboard"><center><h2>Leaderboard</h2><br><table class="table"><tr><th>Position</th><th>Name</th><th>Colour</th></tr></table></center></div>
   <p id="test"></p>
-  <input onclick="resetMap();" type=button value="Press to reset race.">
+  <div id="reset"><button onclick="resetMap();" type="button" class="button">Press to reset race.</button></div>
   <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBy-_F3WSHUYwyvV676CABgyj2Kq8a9EjY&callback=initMap">
   </script>
   <script>
@@ -68,9 +105,9 @@
       //These two values will probably vary by race.
       zoom: 16,
       center: {lat: 51.455792, lng: -2.603306},
-      mapTypeId: 'terrain'
+      mapTypeId: 'satellite'
     });
-    var text = "<center><h2>Leaderboard</h2><br><table><tr><th>Position</th><th>Name</th><th>Colour</th></tr>";
+    var text = "<center><h2>Leaderboard</h2><br><table class='table'><tr><th>Position</th><th>Name</th><th>Colour</th></tr>";
 
     //The boats are defined manually for the time being; this is where we need
     //to import data from the database.
@@ -155,12 +192,12 @@
         geodesic: true,
         strokeColor: colour,
         strokeOpacity: 1.0,
-        strokeWeight: 2,
+        strokeWeight: 4,
       });
     }
     timer = new raceTimer(function() {
       if (window.step < maxLength) {
-        text = "<center><h2>Leaderboard</h2><br><table><tr><th>Position</th><th>Name</th><th>Colour</th></tr>";
+        text = "<center><h2>Leaderboard</h2><br><table class='table'><tr><th>Position</th><th>Name</th><th>Colour</th></tr>";
         var i = 0;
         //Manually changing this for now, but once we have a database this is where
         //we'll want to get the new value for distance travelled from the database.
